@@ -4,7 +4,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Demo Header */}
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      {/* <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
@@ -43,10 +43,10 @@ const Index = () => {
             </a>
           </nav>
         </div>
-      </header>
+      </header> */}
 
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 py-24">
+      {/* <section className="max-w-6xl mx-auto px-6 py-24">
         <div className="text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-medium mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -71,10 +71,10 @@ const Index = () => {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Features Section */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-20">
+      {/* <section id="features" className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
           Key Features
         </h2>
@@ -147,13 +147,13 @@ const Index = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Documentation Section */}
-      <section id="embed" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="space-y-12">
-          {/* Quick Start */}
-          <div className="bg-slate-900 rounded-3xl p-8 md:p-12">
+      {/* <section id="embed" className="max-w-6xl mx-auto px-6 py-20">
+        <div className="space-y-12"> */}
+      {/* Quick Start */}
+      {/* <div className="bg-slate-900 rounded-3xl p-8 md:p-12">
             <h2 className="text-3xl font-bold text-white text-center mb-4">
               Quick Start
             </h2>
@@ -177,10 +177,10 @@ const Index = () => {
 </script>`}
               </pre>
             </div>
-          </div>
+          </div> */}
 
-          {/* Configuration Options */}
-          <div>
+      {/* Configuration Options */}
+      {/* <div>
             <h3 className="text-2xl font-bold text-slate-900 mb-6">
               Configuration Options
             </h3>
@@ -280,14 +280,46 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white">
+      {/* <footer className="border-t border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-8 text-center text-slate-500 text-sm">
           Chat Widget Demo • Click the chat button in the corner to try it out
         </div>
-      </footer>
+      </footer> */}
+
+      <div class="container">
+        <h1>Chat Widget Demo</h1>
+
+        <div class="info">
+          <p>
+            This is a demo page showing the TwoCode Chat Widget in action. The
+            widget is loaded at the bottom right of the page.
+          </p>
+          <p>You can interact with the widget by clicking on the chat icon.</p>
+        </div>
+
+        <h2>About This Demo</h2>
+        <p>
+          This page demonstrates how to integrate the TwoCode Chat Widget into a
+          webpage. The widget is loaded as a UMD module and initialized with
+          default settings.
+        </p>
+
+        <h3>Configuration</h3>
+        <p>The widget is initialized with the following settings:</p>
+        <pre>
+          <code>{`TwoCodeChatWidget.init({
+    title: "Chat Support",
+    subtitle: "We're here to help!",
+    welcomeMessage: "Hello! 👋 How can I help you today?",
+    placeholder: "Type your message...",
+    formTitle: "Start a conversation",
+    formSubtitle: "Please enter your details to begin chatting with us."
+});`}</code>
+        </pre>
+      </div>
 
       {/* The actual widget */}
       <ChatWidget
