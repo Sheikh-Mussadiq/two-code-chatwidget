@@ -16,5 +16,6 @@
       "dest": "/two-code-chat-widget.umd.js"
     },
     { "src": "/(.*)", "dest": "/index.html" }
-  ]
+  ],
+  "outputDirectory": "dist-widget"
 }
