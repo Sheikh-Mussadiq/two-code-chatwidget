@@ -320,7 +320,7 @@ const ChatWidgetContent = ({
                 className="flex-1 p-6 flex flex-col min-h-0 overflow-y-auto overscroll-contain scroll-fade-mask"
                 onSubmit={handleFormSubmit}
               >
-                <h4 className="text-lg font-semibold text-slate-800 mb-2">
+                <h4 className="text-lg font-semibold text-slate-800">
                   {formTitle}
                 </h4>
                 <p className="text-sm text-slate-500 mb-6 leading-relaxed">
