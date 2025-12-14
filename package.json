@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "build:widget": "cross-env BUILD_MODE=library vite build",
-    "build:vercel": "node scripts/vercel-build.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
