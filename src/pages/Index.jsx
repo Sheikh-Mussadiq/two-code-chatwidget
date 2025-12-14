@@ -289,38 +289,57 @@ const Index = () => {
         </div>
       </footer> */}
 
-      <div class="container">
-        <h1>Chat Widget Demo</h1>
+      <div className="bg-white rounded-xl shadow-lg p-8 max-w-5xl mx-auto my-12 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+        <h1 className="text-3xl font-bold text-slate-800 mb-6 text-center">
+          Chat Widget Demo
+        </h1>
 
-        <div class="info">
-          <p>
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8">
+          <p className="text-blue-800 mb-2">
             This is a demo page showing the TwoCode Chat Widget in action. The
             widget is loaded at the bottom right of the page.
           </p>
-          <p>You can interact with the widget by clicking on the chat icon.</p>
+          <p className="text-blue-700 font-medium">
+            You can interact with the widget by clicking on the chat icon.
+          </p>
         </div>
 
-        <h2>About This Demo</h2>
-        <p>
-          This page demonstrates how to integrate the TwoCode Chat Widget into a
-          webpage. The widget is loaded as a UMD module and initialized with
-          default settings.
-        </p>
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-3">
+              About This Demo
+            </h2>
+            <p className="text-slate-600 leading-relaxed">
+              This page demonstrates how to integrate the TwoCode Chat Widget
+              into a webpage. The widget is loaded as a UMD module and
+              initialized with default settings.
+            </p>
+          </div>
 
-        <h3>Configuration</h3>
-        <p>The widget is initialized with the following settings:</p>
-        <pre>
-          <code>{`TwoCodeChatWidget.init({
-    title: "Chat Support",
-    subtitle: "We're here to help!",
-    welcomeMessage: "Hello! 👋 How can I help you today?",
-    placeholder: "Type your message...",
-    formTitle: "Start a conversation",
-    formSubtitle: "Please enter your details to begin chatting with us."
-});`}</code>
-        </pre>
+          <div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-3">
+              Configuration
+            </h3>
+            <p className="text-slate-600 mb-4">
+              The widget is initialized with the following settings:
+            </p>
+            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 overflow-x-auto">
+              <pre className="text-sm text-slate-800 font-mono">
+                <code className="block whitespace-pre overflow-x-auto">
+                  {`TwoCodeChatWidget.init({
+  title: "Chat Support",
+  subtitle: "We're here to help!",
+  welcomeMessage: "Hello! 👋 How can I help you today?",
+  placeholder: "Type your message...",
+  formTitle: "Start a conversation",
+  formSubtitle: "Please enter your details to begin chatting with us."
+});`}
+                </code>
+              </pre>
+            </div>
+          </div>
+        </div>
       </div>
-
       {/* The actual widget */}
       <ChatWidget
         title="Chat Support"
