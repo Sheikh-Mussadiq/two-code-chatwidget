@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Widget Demo</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        color: #1e40af;
+        margin-bottom: 20px;
+      }
+      .info {
+        background-color: #f0f9ff;
+        border-left: 4px solid #3b82f6;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 0 4px 4px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Chat Widget Demo</h1>
+
+      <div class="info">
+        <p>
+          This is a demo page showing the TwoCode Chat Widget in action. The
+          widget is loaded at the bottom right of the page.
+        </p>
+        <p>You can interact with the widget by clicking on the chat icon.</p>
+      </div>
+
+      <h2>About This Demo</h2>
+      <p>
+        This page demonstrates how to integrate the TwoCode Chat Widget into a
+        webpage. The widget is loaded as a UMD module and initialized with
+        default settings.
+      </p>
+
+      <h3>Configuration</h3>
+      <p>The widget is initialized with the following settings:</p>
+      <pre><code>TwoCodeChatWidget.init({
+    title: "Chat Support",
+    subtitle: "We're here to help!",
+    welcomeMessage: "Hello! 👋 How can I help you today?",
+    placeholder: "Type your message...",
+    formTitle: "Start a conversation",
+    formSubtitle: "Please enter your details to begin chatting with us."
+});</code></pre>
+    </div>
+
+    <!-- Load the widget script -->
+    <script src="./dist-widget/two-code-chat-widget.umd.js"></script>
+    <script>
+      // Initialize the widget when the page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        TwoCodeChatWidget.init({
+          title: "Chat Support",
+          subtitle: "We're here to help!",
+          welcomeMessage: "Hello! 👋 How can I help you today?",
+          placeholder: "Type your message...",
+          formTitle: "Start a conversation",
+          formSubtitle: "Please enter your details to begin chatting with us.",
+        });
+      });
+    </script>
+  </body>
+</html>
