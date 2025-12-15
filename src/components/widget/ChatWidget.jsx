@@ -49,8 +49,9 @@ const ChatWidgetContent = ({
   });
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isInitialResponseComplete, setIsInitialResponseComplete] =
-    useState(false);
+  const [isInitialResponseComplete, setIsInitialResponseComplete] = useState(
+    () => messages.length > 0
+  );
   const messagesEndRef = useRef(null);
   const abortControllerRef = useRef(null);
 
