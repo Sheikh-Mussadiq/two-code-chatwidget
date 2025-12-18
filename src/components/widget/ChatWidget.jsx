@@ -500,94 +500,11 @@ const ChatWidgetContent = ({
                   `}
                   >
                     {message.sender === "bot" ? (
-                      <div className="text-slate-800 text-sm leading-relaxed overflow-hidden">
+                      <div className="prose prose-sm prose-slate max-w-none">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm, remarkBreaks]}
                           rehypePlugins={[rehypeRaw]}
-                          components={{
-                            h1: ({ node, ...props }) => (
-                              <h1
-                                className="text-2xl font-bold mt-4 mb-2 text-primary-700"
-                                {...props}
-                              />
-                            ),
-                            h2: ({ node, ...props }) => (
-                              <h2
-                                className="text-xl font-semibold mt-4 mb-2 text-primary-600"
-                                {...props}
-                              />
-                            ),
-                            h3: ({ node, ...props }) => (
-                              <h3
-                                className="text-lg font-semibold mt-3 mb-1 text-primary-500"
-                                {...props}
-                              />
-                            ),
-                            p: ({ node, ...props }) => (
-                              <p className="mb-2 text-gray-700" {...props} />
-                            ),
-                            ul: ({ node, ...props }) => (
-                              <ul
-                                className="my-2 ml-4 list-disc text-gray-700"
-                                {...props}
-                              />
-                            ),
-                            ol: ({ node, ...props }) => (
-                              <ol
-                                className="my-2 ml-4 list-decimal text-gray-700"
-                                {...props}
-                              />
-                            ),
-                            li: ({ node, ...props }) => (
-                              <li className="ml-4" {...props} />
-                            ),
-                            a: ({ node, ...props }) => (
-                              <a
-                                className="text-primary-600 hover:underline"
-                                {...props}
-                              />
-                            ),
-                            blockquote: ({ node, ...props }) => (
-                              <blockquote
-                                className="border-l-4 border-primary-200 pl-4 my-2 italic text-gray-600"
-                                {...props}
-                              />
-                            ),
-                            code: ({ node, inline, ...props }) =>
-                              inline ? (
-                                <code
-                                  className="bg-primary-50 rounded px-1 text-primary-700"
-                                  {...props}
-                                />
-                              ) : (
-                                <code
-                                  className="block bg-primary-50 p-2 rounded text-primary-700"
-                                  {...props}
-                                />
-                              ),
-                            table: ({ node, ...props }) => (
-                              <div className="overflow-x-auto my-4">
-                                <table
-                                  className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg"
-                                  {...props}
-                                />
-                              </div>
-                            ),
-                            th: ({ node, ...props }) => (
-                              <th
-                                className="px-4 py-2 bg-primary-50 text-left text-xs font-medium text-primary-700 uppercase tracking-wider"
-                                {...props}
-                              />
-                            ),
-                            td: ({ node, ...props }) => (
-                              <td
-                                className="px-4 py-2 whitespace-nowrap text-sm text-gray-700"
-                                {...props}
-                              />
-                            ),
-                          }}
                         >
-                          {/* {preprocessMarkdown(message.text)} */}
                           {message.text}
                         </ReactMarkdown>
                       </div>
