@@ -16,39 +16,39 @@ import remarkBreaks from "remark-breaks";
 import ContactForm from "./ContactForm";
 import styles from "../../index.css?inline";
 
-const preprocessMarkdown = (text) => {
-  if (!text) return text;
+// const preprocessMarkdown = (text) => {
+//   if (!text) return text;
 
-  let processed = text;
+//   let processed = text;
 
-  // Fix pattern: "- **Text- **" -> "- **Text**\n- **"
-  // This handles list items that are missing closing ** and newlines
-  processed = processed.replace(/- \*\*([^*\n]+?)- \*\*/g, "- **$1**\n- **");
+//   // Fix pattern: "- **Text- **" -> "- **Text**\n- **"
+//   // This handles list items that are missing closing ** and newlines
+//   processed = processed.replace(/- \*\*([^*\n]+?)- \*\*/g, "- **$1**\n- **");
 
-  // Fix pattern: "Text- **" at the start of what should be a new list item
-  // Add newline before "- **" when preceded by text without newline
-  processed = processed.replace(/([^\n])- \*\*/g, "$1\n- **");
+//   // Fix pattern: "Text- **" at the start of what should be a new list item
+//   // Add newline before "- **" when preceded by text without newline
+//   processed = processed.replace(/([^\n])- \*\*/g, "$1\n- **");
 
-  // Fix: Detect last list item followed by regular sentence (no bullet)
-  // Pattern: "**LastItemText" followed by "If ", "Please ", "For ", "Let ", "Feel ", etc.
-  processed = processed.replace(
-    /\*\*([^*\n]+?)(If |Please |For |Let |Feel |Would |Should |Could |Can |Do |Have |Is |Are |Was |Were |This |That |The |A |An |We |You |I |Our |Your |My )/g,
-    "**$1**\n\n$2"
-  );
+//   // Fix: Detect last list item followed by regular sentence (no bullet)
+//   // Pattern: "**LastItemText" followed by "If ", "Please ", "For ", "Let ", "Feel ", etc.
+//   processed = processed.replace(
+//     /\*\*([^*\n]+?)(If |Please |For |Let |Feel |Would |Should |Could |Can |Do |Have |Is |Are |Was |Were |This |That |The |A |An |We |You |I |Our |Your |My )/g,
+//     "**$1**\n\n$2"
+//   );
 
-  // Ensure bold markers are properly closed before newlines or end of string
-  processed = processed.replace(
-    /\*\*([^*\n]+?)(\n|$)/g,
-    (match, content, ending) => {
-      if (!content.trim().endsWith("**")) {
-        return `**${content.trim()}**${ending}`;
-      }
-      return match;
-    }
-  );
+//   // Ensure bold markers are properly closed before newlines or end of string
+//   processed = processed.replace(
+//     /\*\*([^*\n]+?)(\n|$)/g,
+//     (match, content, ending) => {
+//       if (!content.trim().endsWith("**")) {
+//         return `**${content.trim()}**${ending}`;
+//       }
+//       return match;
+//     }
+//   );
 
-  return processed;
-};
+//   return processed;
+// };
 
 const STORAGE_KEYS = {
   USER_INFO: "twocode_chat_user_info",
@@ -587,7 +587,8 @@ const ChatWidgetContent = ({
                             ),
                           }}
                         >
-                          {preprocessMarkdown(message.text)}
+                          {/* {preprocessMarkdown(message.text)} */}
+                          {message.text}
                         </ReactMarkdown>
                       </div>
                     ) : (
