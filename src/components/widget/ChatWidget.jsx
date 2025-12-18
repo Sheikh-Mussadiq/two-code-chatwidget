@@ -9,8 +9,46 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import remarkBreaks from "remark-breaks";
 import ContactForm from "./ContactForm";
 import styles from "../../index.css?inline";
+
+const preprocessMarkdown = (text) => {
+  if (!text) return text;
+
+  let processed = text;
+
+  // Fix pattern: "- **Text- **" -> "- **Text**\n- **"
+  // This handles list items that are missing closing ** and newlines
+  processed = processed.replace(/- \*\*([^*\n]+?)- \*\*/g, "- **$1**\n- **");
+
+  // Fix pattern: "Text- **" at the start of what should be a new list item
+  // Add newline before "- **" when preceded by text without newline
+  processed = processed.replace(/([^\n])- \*\*/g, "$1\n- **");
+
+  // Fix: Detect last list item followed by regular sentence (no bullet)
+  // Pattern: "**LastItemText" followed by "If ", "Please ", "For ", "Let ", "Feel ", etc.
+  processed = processed.replace(
+    /\*\*([^*\n]+?)(If |Please |For |Let |Feel |Would |Should |Could |Can |Do |Have |Is |Are |Was |Were |This |That |The |A |An |We |You |I |Our |Your |My )/g,
+    "**$1**\n\n$2"
+  );
+
+  // Ensure bold markers are properly closed before newlines or end of string
+  processed = processed.replace(
+    /\*\*([^*\n]+?)(\n|$)/g,
+    (match, content, ending) => {
+      if (!content.trim().endsWith("**")) {
+        return `**${content.trim()}**${ending}`;
+      }
+      return match;
+    }
+  );
+
+  return processed;
+};
 
 const STORAGE_KEYS = {
   USER_INFO: "twocode_chat_user_info",
@@ -122,15 +160,22 @@ const ChatWidgetContent = ({
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((line) => line.trim());
+        buffer += chunk;
+
+        const lines = buffer.split("\n");
+        // Keep the last potentially incomplete line in the buffer
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
+          if (!line.trim()) continue;
+
           try {
             const parsed = JSON.parse(line);
             if (
@@ -147,7 +192,7 @@ const ChatWidgetContent = ({
               );
             }
           } catch {
-            // Skip malformed JSON lines
+            console.warn("Skipping malformed JSON line in stream:", line);
           }
         }
       }
@@ -160,10 +205,6 @@ const ChatWidgetContent = ({
     }
   };
 
-  const handleFormSubmit = (data) => {
-    setUserInfo(data);
-  };
-
   const buildChatHistory = (currentMessages) => {
     return currentMessages
       .filter((msg) => msg.sender === "user" || msg.sender === "bot")
@@ -171,6 +212,88 @@ const ChatWidgetContent = ({
         role: msg.sender === "user" ? "user" : "assistant",
         content: msg.text,
       }));
+  };
+
+  const handleFormSubmit = async (data) => {
+    setUserInfo(data);
+
+    // Send user details to AI for a personalized response
+    setIsTyping(true);
+    const botMessageId = (Date.now() + 1).toString();
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_details: {
+            email: data.email,
+            name: data.name,
+            phone_number: data.phone,
+          },
+          messages: buildChatHistory(messages),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setIsTyping(false);
+
+      const botMessage = {
+        id: botMessageId,
+        text: "",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const parsed = JSON.parse(line);
+            if (
+              parsed.event === "response.output_text.delta" &&
+              parsed.content
+            ) {
+              accumulatedText += parsed.content;
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === botMessageId
+                    ? { ...msg, text: accumulatedText }
+                    : msg
+                )
+              );
+            }
+          } catch {
+            console.warn("Skipping malformed JSON line in stream:", line);
+          }
+        }
+      }
+    } catch (error) {
+      setIsTyping(false);
+      console.error("Failed to get AI response:", error);
+    }
   };
 
   const handleSend = async () => {
@@ -376,7 +499,100 @@ const ChatWidgetContent = ({
                     }
                   `}
                   >
-                    {message.text}
+                    {message.sender === "bot" ? (
+                      <div className="text-slate-800 text-sm leading-relaxed overflow-hidden">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({ node, ...props }) => (
+                              <h1
+                                className="text-2xl font-bold mt-4 mb-2 text-primary-700"
+                                {...props}
+                              />
+                            ),
+                            h2: ({ node, ...props }) => (
+                              <h2
+                                className="text-xl font-semibold mt-4 mb-2 text-primary-600"
+                                {...props}
+                              />
+                            ),
+                            h3: ({ node, ...props }) => (
+                              <h3
+                                className="text-lg font-semibold mt-3 mb-1 text-primary-500"
+                                {...props}
+                              />
+                            ),
+                            p: ({ node, ...props }) => (
+                              <p className="mb-2 text-gray-700" {...props} />
+                            ),
+                            ul: ({ node, ...props }) => (
+                              <ul
+                                className="my-2 ml-4 list-disc text-gray-700"
+                                {...props}
+                              />
+                            ),
+                            ol: ({ node, ...props }) => (
+                              <ol
+                                className="my-2 ml-4 list-decimal text-gray-700"
+                                {...props}
+                              />
+                            ),
+                            li: ({ node, ...props }) => (
+                              <li className="ml-4" {...props} />
+                            ),
+                            a: ({ node, ...props }) => (
+                              <a
+                                className="text-primary-600 hover:underline"
+                                {...props}
+                              />
+                            ),
+                            blockquote: ({ node, ...props }) => (
+                              <blockquote
+                                className="border-l-4 border-primary-200 pl-4 my-2 italic text-gray-600"
+                                {...props}
+                              />
+                            ),
+                            code: ({ node, inline, ...props }) =>
+                              inline ? (
+                                <code
+                                  className="bg-primary-50 rounded px-1 text-primary-700"
+                                  {...props}
+                                />
+                              ) : (
+                                <code
+                                  className="block bg-primary-50 p-2 rounded text-primary-700"
+                                  {...props}
+                                />
+                              ),
+                            table: ({ node, ...props }) => (
+                              <div className="overflow-x-auto my-4">
+                                <table
+                                  className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg"
+                                  {...props}
+                                />
+                              </div>
+                            ),
+                            th: ({ node, ...props }) => (
+                              <th
+                                className="px-4 py-2 bg-primary-50 text-left text-xs font-medium text-primary-700 uppercase tracking-wider"
+                                {...props}
+                              />
+                            ),
+                            td: ({ node, ...props }) => (
+                              <td
+                                className="px-4 py-2 whitespace-nowrap text-sm text-gray-700"
+                                {...props}
+                              />
+                            ),
+                          }}
+                        >
+                          {preprocessMarkdown(message.text)}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      message.text
+                    )}
                   </div>
                 ))}
                 {isTyping && (

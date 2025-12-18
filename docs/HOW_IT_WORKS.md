@@ -48,6 +48,16 @@ The widget communicates with a streaming AI endpoint:
 - **Payload**: Sends the full conversation history and user details (Name, Email, Phone) with each request.
 - **Response**: Updates the bot's message in real-time as chunks arrive (`response.output_text.delta`).
 
+## User Flow
+
+1. **Widget Opens**: When the user opens the widget, an initial greeting is fetched from the AI.
+2. **Contact Form**: After the initial greeting, a contact form is displayed asking for Name, Email, and Phone.
+3. **Form Submission**: When the user submits their details:
+   - User info is saved to `localStorage`.
+   - The details are sent to the AI endpoint (via `user_details` field).
+   - The AI responds with a personalized message acknowledging the user.
+4. **Chat Continues**: The user can now send messages and receive AI responses.
+
 ## Data Persistence & State Management
 
 The widget persists user data to maintain state across page reloads:
