@@ -1,72 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import {
-  X,
-  ArrowUp,
-  MessageSquare,
-  ChevronsUp,
-  User,
-  Mail,
-  Phone,
-} from "lucide-react";
+import { X, ArrowUp, MessageSquare, ChevronsUp } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
 import ContactForm from "./ContactForm";
+import OptionsList from "./OptionsList";
 import styles from "../../index.css?inline";
-
-// const preprocessMarkdown = (text) => {
-//   if (!text) return text;
-
-//   let processed = text;
-
-//   // Fix pattern: "- **Text- **" -> "- **Text**\n- **"
-//   // This handles list items that are missing closing ** and newlines
-//   processed = processed.replace(/- \*\*([^*\n]+?)- \*\*/g, "- **$1**\n- **");
-
-//   // Fix pattern: "Text- **" at the start of what should be a new list item
-//   // Add newline before "- **" when preceded by text without newline
-//   processed = processed.replace(/([^\n])- \*\*/g, "$1\n- **");
-
-//   // Fix: Detect last list item followed by regular sentence (no bullet)
-//   // Pattern: "**LastItemText" followed by "If ", "Please ", "For ", "Let ", "Feel ", etc.
-//   processed = processed.replace(
-//     /\*\*([^*\n]+?)(If |Please |For |Let |Feel |Would |Should |Could |Can |Do |Have |Is |Are |Was |Were |This |That |The |A |An |We |You |I |Our |Your |My )/g,
-//     "**$1**\n\n$2"
-//   );
-
-//   // Ensure bold markers are properly closed before newlines or end of string
-//   processed = processed.replace(
-//     /\*\*([^*\n]+?)(\n|$)/g,
-//     (match, content, ending) => {
-//       if (!content.trim().endsWith("**")) {
-//         return `**${content.trim()}**${ending}`;
-//       }
-//       return match;
-//     }
-//   );
-
-//   return processed;
-// };
 
 const STORAGE_KEYS = {
   USER_INFO: "twocode_chat_user_info",
   MESSAGES: "twocode_chat_messages",
+  CONVERSATION_ID: "twocode_chat_id",
 };
 
-const API_ENDPOINT = "https://tracking-software.aicumen.cloud/ai/chat";
+const API_BASE = "https://tracking-software.aicumen.cloud";
 
 const ChatWidgetContent = ({
   title = "Chat Support",
   subtitle = "We typically reply within minutes",
   placeholder = "Type your message...",
-  welcomeMessage = "Hello! 👋 How can I help you today?",
-  formTitle = "Start a conversation",
   formSubtitle = "Please enter your details to begin chatting with us.",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // Removed duplicated userInfo state declaration
+  const [conversationId, setConversationId] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.CONVERSATION_ID) || null;
+  });
 
   const [userInfo, setUserInfo] = useState(() => {
     try {
@@ -76,7 +36,7 @@ const ChatWidgetContent = ({
       return null;
     }
   });
-  // Removed internal form state in favor of ContactForm component
+
   const [messages, setMessages] = useState(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.MESSAGES);
@@ -85,17 +45,22 @@ const ChatWidgetContent = ({
       return [];
     }
   });
+
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isInitialResponseComplete, setIsInitialResponseComplete] = useState(
-    () => messages.length > 0
-  );
-  const messagesEndRef = useRef(null);
-  const abortControllerRef = useRef(null);
+  const [currentResponse, setCurrentResponse] = useState(null);
 
-  const scrollToBottom = () => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
+
+  useEffect(() => {
+    if (conversationId) {
+      localStorage.setItem(STORAGE_KEYS.CONVERSATION_ID, conversationId);
+    }
+  }, [conversationId]);
 
   useEffect(() => {
     if (userInfo) {
@@ -107,295 +72,155 @@ const ChatWidgetContent = ({
     if (messages.length > 0) {
       localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     }
-  }, [messages]);
-
-  useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping, isOpen]);
+  }, [messages, scrollToBottom]);
 
-  // Initial greeting effect
   useEffect(() => {
-    if (isOpen && messages.length === 0 && !isTyping) {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [isOpen, isTyping, scrollToBottom]);
+
+  // Initial conversation start
+  useEffect(() => {
+    if (isOpen && !conversationId && messages.length === 0 && !isTyping) {
       initiateConversation();
     }
-  }, [isOpen, messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, conversationId, messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const callApi = async (path, body, method = "POST", queryParams = {}) => {
+    try {
+      const url = new URL(`${API_BASE}${path}`);
+      Object.keys(queryParams).forEach((key) =>
+        url.searchParams.append(key, queryParams[key])
+      );
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`API Call failed (${path}):`, error);
+      throw error;
+    }
+  };
+
+  const processAgentResponse = (response) => {
+    if (response.conversation_id && !conversationId) {
+      setConversationId(response.conversation_id);
+    }
+
+    setCurrentResponse(response);
+
+    if (response.ai_message) {
+      const botMessage = {
+        id: Date.now().toString(),
+        text: response.ai_message,
+        sender: "bot",
+        timestamp: new Date(),
+        response_type: response.response_type,
+        options: response.options,
+        collect_details: response.collect_details,
+        data_fields: response.data_fields,
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    }
+  };
 
   const initiateConversation = async () => {
     setIsTyping(true);
-    const botMessageId = (Date.now() + 1).toString();
-
     try {
-      // Send hidden "Hello" message
-      // We pass empty user details as requested
-      const response = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_details: {
-            email: "",
-            name: "",
-            phone_number: "",
-          },
-          messages: [{ role: "user", content: "Hello" }],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      setIsTyping(false);
-
-      const botMessage = {
-        id: botMessageId,
-        text: "",
+      const data = await callApi("/conversation/start");
+      processAgentResponse(data);
+    } catch (error) {
+      const errorMessage = {
+        id: Date.now().toString(),
+        text: "Sorry, I'm having trouble connecting. Please try again later.",
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, botMessage]);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split("\n");
-        // Keep the last potentially incomplete line in the buffer
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.trim()) continue;
-
-          try {
-            const parsed = JSON.parse(line);
-            if (
-              parsed.event === "response.output_text.delta" &&
-              parsed.content
-            ) {
-              accumulatedText += parsed.content;
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === botMessageId
-                    ? { ...msg, text: accumulatedText }
-                    : msg
-                )
-              );
-            }
-          } catch {
-            console.warn("Skipping malformed JSON line in stream:", line);
-          }
-        }
-      }
-
-      setIsInitialResponseComplete(true);
-    } catch (error) {
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-      setIsInitialResponseComplete(true); // Ensure form shows even on error
-      console.error("Failed to initiate conversation:", error);
     }
   };
 
-  const buildChatHistory = (currentMessages) => {
-    return currentMessages
-      .filter((msg) => msg.sender === "user" || msg.sender === "bot")
-      .map((msg) => ({
-        role: msg.sender === "user" ? "user" : "assistant",
-        content: msg.text,
-      }));
-  };
+  const handleSend = async (textOverride) => {
+    const text = textOverride || inputValue.trim();
+    if (!text) return;
 
-  const handleFormSubmit = async (data) => {
-    setUserInfo(data);
-
-    // Send user details to AI for a personalized response
-    setIsTyping(true);
-    const botMessageId = (Date.now() + 1).toString();
-
-    try {
-      const response = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_details: {
-            email: data.email,
-            name: data.name,
-            phone_number: data.phone,
-          },
-          messages: buildChatHistory(messages),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      setIsTyping(false);
-
-      const botMessage = {
-        id: botMessageId,
-        text: "",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.trim()) continue;
-
-          try {
-            const parsed = JSON.parse(line);
-            if (
-              parsed.event === "response.output_text.delta" &&
-              parsed.content
-            ) {
-              accumulatedText += parsed.content;
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === botMessageId
-                    ? { ...msg, text: accumulatedText }
-                    : msg
-                )
-              );
-            }
-          } catch {
-            console.warn("Skipping malformed JSON line in stream:", line);
-          }
-        }
-      }
-    } catch (error) {
-      setIsTyping(false);
-      console.error("Failed to get AI response:", error);
-    }
-  };
-
-  const handleSend = async () => {
-    if (!inputValue.trim() || !userInfo) return;
-
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
+    if (!textOverride) setInputValue("");
 
     const userMessage = {
       id: Date.now().toString(),
-      text: inputValue.trim(),
+      text,
       sender: "user",
       timestamp: new Date(),
     };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInputValue("");
+    setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    const chatHistory = buildChatHistory(updatedMessages);
-
-    const botMessageId = (Date.now() + 1).toString();
-
     try {
-      const response = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+      const data = await callApi("/conversation/send", {
+        conversation_id: conversationId,
+        user_message: {
+          role: "user",
+          content: text,
         },
-        body: JSON.stringify({
-          user_details: {
-            email: userInfo.email,
-            name: userInfo.name,
-            phone_number: userInfo.phone || "",
-          },
-          messages: chatHistory,
-        }),
-        signal: abortControllerRef.current.signal,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      setIsTyping(false);
-
-      const botMessage = {
-        id: botMessageId,
-        text: "",
+      processAgentResponse(data);
+    } catch (error) {
+      const errorMessage = {
+        id: Date.now().toString(),
+        text: "Sorry, something went wrong. Let me try that again.",
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, botMessage]);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((line) => line.trim());
-
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            if (
-              parsed.event === "response.output_text.delta" &&
-              parsed.content
-            ) {
-              accumulatedText += parsed.content;
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === botMessageId
-                    ? { ...msg, text: accumulatedText }
-                    : msg
-                )
-              );
-            }
-          } catch {
-            // Skip malformed JSON lines
-          }
-        }
-      }
-    } catch (error) {
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-      if (error.name !== "AbortError") {
-        const errorMessage = {
-          id: botMessageId,
-          text: "Sorry, something went wrong. Please try again.",
-          sender: "bot",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      }
     }
+  };
+
+  const handleFormSubmit = async (data) => {
+    setIsTyping(true);
+    try {
+      // 1. Submit details
+      await callApi("/conversation/submit-details", data, "POST", {
+        conversation_id: conversationId,
+      });
+
+      // 2. Refresh state/userInfo locally
+      setUserInfo(data);
+
+      // 3. Send a hidden message to trigger next step if needed, or just wait for next response
+      // According to documentation, submit-details is called when frontend collects form data.
+      // We might need to send a follow-up or the API might respond with next step.
+      // Current API contract for submit-details returns unknown.
+      // Let's send a "Details submitted" or similar if the bot doesn't automatically respond.
+      // Actually, typically the next message is expected from the user.
+      // But if the bot was waiting for form, we should probably trigger the next step.
+      await handleSend("Submitted my details");
+    } catch (error) {
+      console.error("Failed to submit details:", error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleOptionSelect = (option) => {
+    handleSend(option);
   };
 
   const handleKeyPress = (e) => {
@@ -404,6 +229,23 @@ const ChatWidgetContent = ({
       handleSend();
     }
   };
+
+  const lastMessage = messages[messages.length - 1];
+  const showContactForm =
+    lastMessage?.sender === "bot" &&
+    (lastMessage.response_type === "contact_form" ||
+      lastMessage.response_type === "emergency_form" ||
+      lastMessage.collect_details);
+
+  const getOptions = () => {
+    if (lastMessage?.sender !== "bot") return null;
+    if (lastMessage.response_type === "options") return lastMessage.options;
+    if (lastMessage.response_type === "boolean") return ["Yes", "No"];
+    return null;
+  };
+
+  const options = getOptions();
+  const showOptions = !!options;
 
   return (
     <div
@@ -422,7 +264,7 @@ const ChatWidgetContent = ({
           }
         `}
       >
-        {/* Closed State (Pill/Button) */}
+        {/* Closed State */}
         <div
           className={`
             absolute inset-0 flex items-center px-2 gap-4 transition-all duration-300 z-10
@@ -434,35 +276,27 @@ const ChatWidgetContent = ({
           `}
           onClick={() => !isOpen && setIsOpen(true)}
         >
-          {/* Avatar */}
           <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center relative shrink-0">
             <MessageSquare className="w-5 h-5 text-blue-600" />
             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
           </div>
-
-          {/* Text Info */}
           <div className="flex-1 min-w-0 text-left">
             <h3 className="text-sm font-semibold text-slate-900 leading-tight">
               {title}
             </h3>
             <p className="text-xs text-slate-500 truncate">
-              {userInfo
-                ? messages.length > 0
-                  ? messages[messages.length - 1].text
-                  : "Continue conversation"
-                : formSubtitle}
+              {messages.length > 0
+                ? messages[messages.length - 1].text
+                : subtitle}
             </p>
           </div>
-
-          {/* Expand Icon */}
           <ChevronsUp className="w-5 h-5 text-slate-400" />
         </div>
 
         {/* Open State (Chat Window) */}
         {isOpen && (
           <div className="flex flex-col w-full h-full bg-white">
-            {/* Header */}
-            <div className="p-5 bg-white flex items-center gap-4 shrink-0">
+            <div className="p-5 bg-white flex items-center gap-4 shrink-0 border-b border-slate-50">
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center relative shrink-0">
                 <MessageSquare className="w-5 h-5 text-blue-600" />
                 <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
@@ -484,33 +318,42 @@ const ChatWidgetContent = ({
               </button>
             </div>
 
-            {/* Chat Content */}
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 px-5 py-6 overflow-y-auto space-y-3 scroll-smooth custom-scrollbar flex flex-col overscroll-contain scroll-fade-mask">
+              <div className="flex-1 px-5 py-6 overflow-y-auto space-y-4 scroll-smooth custom-scrollbar flex flex-col overscroll-contain">
                 {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`
-                    max-w-[85%] p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm animate-in slide-in-from-bottom-2 fade-in duration-300
-                    ${
-                      message.sender === "user"
-                        ? "self-end bg-blue-600 text-white rounded-tr-sm"
-                        : "self-start bg-slate-100 text-slate-800 rounded-tl-sm"
-                    }
-                  `}
-                  >
-                    {message.sender === "bot" ? (
-                      <div className="prose prose-sm prose-slate max-w-none">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm, remarkBreaks]}
-                          rehypePlugins={[rehypeRaw]}
-                        >
-                          {message.text}
-                        </ReactMarkdown>
-                      </div>
-                    ) : (
-                      message.text
-                    )}
+                  <div key={message.id} className="flex flex-col gap-1">
+                    <div
+                      className={`
+                      max-w-[85%] p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm animate-in slide-in-from-bottom-2 fade-in duration-300
+                      ${
+                        message.sender === "user"
+                          ? "self-end bg-blue-600 text-white rounded-tr-sm"
+                          : "self-start bg-slate-100 text-slate-800 rounded-tl-sm"
+                      }
+                    `}
+                    >
+                      {message.sender === "bot" ? (
+                        <div className="prose prose-sm prose-slate max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm, remarkBreaks]}
+                            rehypePlugins={[rehypeRaw]}
+                          >
+                            {message.text}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        message.text
+                      )}
+                    </div>
+                    {message.sender === "bot" &&
+                      messages.indexOf(message) === messages.length - 1 &&
+                      showOptions && (
+                        <OptionsList
+                          options={options}
+                          onSelect={handleOptionSelect}
+                          disabled={isTyping}
+                        />
+                      )}
                   </div>
                 ))}
                 {isTyping && (
@@ -523,13 +366,17 @@ const ChatWidgetContent = ({
                 <div ref={messagesEndRef} />
               </div>
 
-              {!userInfo && isInitialResponseComplete ? (
+              {showContactForm && (
                 <ContactForm
                   onSubmit={handleFormSubmit}
-                  subtitle="Please fill in your details so we can help you better."
+                  data_fields={lastMessage.data_fields || ["name", "email"]}
+                  isSubmitting={isTyping}
+                  subtitle={formSubtitle}
                 />
-              ) : userInfo ? (
-                <div className="p-4 bg-white">
+              )}
+
+              {!showContactForm && (
+                <div className="p-4 bg-white border-t border-slate-50">
                   <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-1.5 py-1.5 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
                     <input
                       type="text"
@@ -538,21 +385,18 @@ const ChatWidgetContent = ({
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyPress}
+                      disabled={isTyping}
                     />
                     <button
                       className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-300"
-                      onClick={handleSend}
-                      disabled={!inputValue.trim()}
+                      onClick={() => handleSend()}
+                      disabled={!inputValue.trim() || isTyping}
                     >
                       <ArrowUp className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
-              ) : null}
-
-              {/* <div className="text-center py-2 text-[10px] text-slate-400 bg-slate-50/50 border-t border-slate-100">
-              Powered by Your Company
-            </div> */}
+              )}
             </div>
           </div>
         )}

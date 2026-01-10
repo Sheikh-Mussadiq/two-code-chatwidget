@@ -38,33 +38,44 @@ shadow.adoptedStyleSheets = [styleSheet];
 
 This ensures the widget has all its Tailwind utility classes available inside the isolated environment.
 
-## API Integration
+## API Integration (V2)
 
-The widget communicates with a streaming AI endpoint:
+The widget uses a structured conversation API (V2):
 
-- **Endpoint**: `https://tracking-software.aicumen.cloud/ai/chat`
-- **Method**: `POST`
-- **Streaming**: Uses `ReadableStream` to process Server-Sent Events (SSE) / NDJSON.
-- **Payload**: Sends the full conversation history and user details (Name, Email, Phone) with each request.
-- **Response**: Updates the bot's message in real-time as chunks arrive (`response.output_text.delta`).
+- **Base URL**: `https://tracking-software.aicumen.cloud`
+- **Endpoints**:
+  - `POST /conversation/start`: Starts a new conversation and returns an `AgentResponse`.
+  - `POST /conversation/send`: Sends a user message and returns the next `AgentResponse`.
+  - `POST /conversation/submit-details`: Submits collected form data (Name, Email, etc.).
+- **Structured Responses**: The API returns an `AgentResponse` object with:
+  - `ai_message`: Text content.
+  - `response_type`: One of `text`, `options`, `boolean`, `contact_form`, `emergency_form`.
+  - `options`/`data_fields`: Context-specific data for interactive elements.
+  - `conversation_id`: Unique identifier for the session.
 
-## User Flow
+## User Flow (V2)
 
-1. **Widget Opens**: When the user opens the widget, an initial greeting is fetched from the AI.
-2. **Contact Form**: After the initial greeting, a contact form is displayed asking for Name, Email, and Phone.
-3. **Form Submission**: When the user submits their details:
-   - User info is saved to `localStorage`.
-   - The details are sent to the AI endpoint (via `user_details` field).
-   - The AI responds with a personalized message acknowledging the user.
-4. **Chat Continues**: The user can now send messages and receive AI responses.
+1. **Conversation Initialization**:
+   - When opened for the first time, calls `/conversation/start`.
+   - The `conversation_id` is stored in `localStorage` for continuity.
+2. **Proactive Interaction**:
+   - The bot's response dictates the UI behavior.
+   - If `response_type` is `options` or `boolean`, the `OptionsList` component renders selectable buttons.
+   - If `response_type` is `contact_form` or `collect_details` is true, the `ContactForm` renders dynamically based on requested `data_fields`.
+3. **Structured Data Submission**:
+   - Forms are submitted to `/conversation/submit-details`.
+   - After submission, the widget automatically sends a follow-up or waits for the next step.
+4. **Messaging**:
+   - User messages are sent to `/conversation/send` with the current `conversation_id`.
 
 ## Data Persistence & State Management
 
-The widget persists user data to maintain state across page reloads:
+The widget persists data to maintain state across page reloads:
 
-1. **User Details**: Name, Email, and Phone are saved to `localStorage` under `twocode_chat_user_info`.
-2. **Chat History**: All messages are saved to `localStorage` under `twocode_chat_messages`.
-3. **Closed State**: The widget pill displays dynamic content:
+1. **Conversation ID**: Saved to `localStorage` under `twocode_chat_id`.
+2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
+3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
+4. **Closed State**: The widget pill displays dynamic content:
    - If no chat history: Shows the configured `formSubtitle`.
    - If chat exists: Shows the last message sent or received.
 

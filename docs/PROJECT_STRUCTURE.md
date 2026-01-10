@@ -13,7 +13,9 @@ glow-chat-widget/
 │   ├── components/             # React components
 │   │   ├── ui/                 # Reusable UI components (custom minimal versions)
 │   │   └── widget/             # Core widget components
-│   │       └── ChatWidget.jsx  # Main chat widget UI component
+│   │       ├── ChatWidget.jsx  # Main chat widget UI component
+│   │       ├── ContactForm.jsx  # Dynamic contact form
+│   │       └── OptionsList.jsx  # Selectable options/buttons
 │   ├── hooks/                  # Custom React hooks
 │   ├── lib/                    # Utility functions
 │   ├── pages/                  # Demo pages (Index, NotFound)
@@ -46,6 +48,44 @@ The core React component for the chat interface. It:
 - Uses Shadow DOM to encapsulate styles and prevent conflicts with the host page.
 - Injects Tailwind styles directly into the Shadow DOM.
 - Manages chat state (open/close, messages, form data).
+
+## API Integration (V2)
+
+The widget uses a structured conversation API (V2):
+
+- **Base URL**: `https://tracking-software.aicumen.cloud`
+- **Endpoints**:
+  - `POST /conversation/start`: Starts a new conversation and returns an `AgentResponse`.
+  - `POST /conversation/send`: Sends a user message and returns the next `AgentResponse`.
+  - `POST /conversation/submit-details`: Submits collected form data (Name, Email, etc.).
+- **Structured Responses**: The API returns an `AgentResponse` object with:
+  - `ai_message`: Text content.
+  - `response_type`: One of `text`, `options`, `boolean`, `contact_form`, `emergency_form`.
+  - `options`/`data_fields`: Context-specific data for interactive elements.
+  - `conversation_id`: Unique identifier for the session.
+
+## User Flow (V2)
+
+1. **Conversation Initialization**:
+   - When opened for the first time, calls `/conversation/start`.
+   - The `conversation_id` is stored in `localStorage` for continuity.
+2. **Proactive Interaction**:
+   - The bot's response dictates the UI behavior.
+   - If `response_type` is `options` or `boolean`, the `OptionsList` component renders selectable buttons.
+   - If `response_type` is `contact_form` or `collect_details` is true, the `ContactForm` renders dynamically based on requested `data_fields`.
+3. **Structured Data Submission**:
+   - Forms are submitted to `/conversation/submit-details`.
+   - After submission, the widget automatically transitions back to chat mode.
+4. **Messaging**:
+   - User messages are sent to `/conversation/send` with the current `conversation_id`.
+
+## Data Persistence & State Management
+
+The widget persists data to maintain state across page reloads:
+
+1. **Conversation ID**: Saved to `localStorage` under `twocode_chat_id`.
+2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
+3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
 
 ### `vite.config.js`
 

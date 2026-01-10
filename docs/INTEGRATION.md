@@ -37,15 +37,12 @@ Initialize the widget with your desired configuration:
 
 You can customize the widget by passing an options object to the `init` method.
 
-| Option           | Type     | Default                                 | Description                                                                  |
-| :--------------- | :------- | :-------------------------------------- | :--------------------------------------------------------------------------- |
-| `title`          | `string` | `"Chat Support"`                        | The main title displayed in the widget header.                               |
-| `subtitle`       | `string` | `"We typically reply within minutes"`   | Subtitle text below the main title.                                          |
-| `welcomeMessage` | `string` | `"Hello! 👋 How can I help you today?"` | Initial message from the bot when chat starts.                               |
-| `placeholder`    | `string` | `"Type your message..."`                | Placeholder text for the message input.                                      |
-| `formTitle`      | `string` | `"Start a conversation"`                | Title for the pre-chat form.                                                 |
-| `formSubtitle`   | `string` | `"Please enter your details..."`        | Subtitle for the form. Also shown in closed state if no chat history exists. |
-| `primaryColor`   | `string` | -                                       | (Coming Soon) Custom primary color for the widget.                           |
+| Option         | Type     | Default                               | Description                                                                  |
+| :------------- | :------- | :------------------------------------ | :--------------------------------------------------------------------------- |
+| `title`        | `string` | `"Chat Support"`                      | The main title displayed in the widget header.                               |
+| `subtitle`     | `string` | `"We typically reply within minutes"` | Subtitle text below the main title.                                          |
+| `placeholder`  | `string` | `"Type your message..."`              | Placeholder text for the message input.                                      |
+| `formSubtitle` | `string` | `"Please enter your details..."`      | Subtitle for the form. Also shown in closed state if no chat history exists. |
 
 ## Hosting the Widget
 
