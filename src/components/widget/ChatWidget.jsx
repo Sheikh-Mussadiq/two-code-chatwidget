@@ -13,9 +13,15 @@ const STORAGE_KEYS = {
   USER_INFO: "twocode_chat_user_info",
   MESSAGES: "twocode_chat_messages",
   CONVERSATION_ID: "twocode_chat_id",
+  LAST_ACTIVITY: "twocode_chat_last_activity",
 };
 
+const SESSION_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours
+// const SESSION_TIMEOUT_MS = 5000; // 5 seconds test
+
 const API_BASE = "https://tracking-software.aicumen.cloud";
+
+const WELCOME_MESSAGE = "Hello! 👋 How can I help you today?";
 
 const ChatWidgetContent = ({
   title = "Chat Support",
@@ -24,7 +30,20 @@ const ChatWidgetContent = ({
   formSubtitle = "Please enter your details to begin chatting with us.",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Helper to check if session should be reset
+  const isSessionExpired = useCallback(() => {
+    const lastActivity = localStorage.getItem(STORAGE_KEYS.LAST_ACTIVITY);
+    if (!lastActivity) return false;
+    return Date.now() - parseInt(lastActivity, 10) > SESSION_TIMEOUT_MS;
+  }, []);
+
   const [conversationId, setConversationId] = useState(() => {
+    if (isSessionExpired()) {
+      localStorage.removeItem(STORAGE_KEYS.MESSAGES);
+      localStorage.removeItem(STORAGE_KEYS.CONVERSATION_ID);
+      return null;
+    }
     return localStorage.getItem(STORAGE_KEYS.CONVERSATION_ID) || null;
   });
 
@@ -38,6 +57,7 @@ const ChatWidgetContent = ({
   });
 
   const [messages, setMessages] = useState(() => {
+    if (isSessionExpired()) return [];
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.MESSAGES);
       return stored ? JSON.parse(stored) : [];
@@ -54,6 +74,10 @@ const ChatWidgetContent = ({
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const updateActivity = useCallback(() => {
+    localStorage.setItem(STORAGE_KEYS.LAST_ACTIVITY, Date.now().toString());
   }, []);
 
   useEffect(() => {
@@ -135,6 +159,7 @@ const ChatWidgetContent = ({
       };
       setMessages((prev) => [...prev, botMessage]);
     }
+    updateActivity();
   };
 
   const initiateConversation = async () => {
@@ -170,6 +195,7 @@ const ChatWidgetContent = ({
 
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
+    updateActivity();
 
     try {
       const data = await callApi("/conversation/send", {
@@ -288,6 +314,7 @@ const ChatWidgetContent = ({
               {messages.length > 0
                 ? messages[messages.length - 1].text
                 : subtitle}
+              {/* // : WELCOME_MESSAGE */}
             </p>
           </div>
           <ChevronsUp className="w-5 h-5 text-slate-400" />
@@ -320,6 +347,20 @@ const ChatWidgetContent = ({
 
             <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 px-5 py-6 overflow-y-auto space-y-4 scroll-smooth custom-scrollbar flex flex-col overscroll-contain">
+                {/* Welcome Message (Not in history) */}
+                <div className="flex flex-col gap-1">
+                  <div className="max-w-[85%] p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm self-start bg-slate-100 text-slate-800 rounded-tl-sm animate-in slide-in-from-bottom-2 fade-in duration-300">
+                    <div className="prose prose-sm prose-slate max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                        rehypePlugins={[rehypeRaw]}
+                      >
+                        {WELCOME_MESSAGE}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+
                 {messages.map((message) => (
                   <div key={message.id} className="flex flex-col gap-1">
                     <div
@@ -377,20 +418,26 @@ const ChatWidgetContent = ({
 
               {!showContactForm && (
                 <div className="p-4 bg-white border-t border-slate-50">
-                  <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-1.5 py-1.5 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
+                  <div
+                    className={`flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-1.5 py-1.5 transition-all duration-200 ${!showOptions ? "focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100" : "opacity-75 cursor-not-allowed"}`}
+                  >
                     <input
                       type="text"
-                      className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 pl-3"
-                      placeholder={placeholder}
+                      className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 pl-3 disabled:cursor-not-allowed"
+                      placeholder={
+                        showOptions
+                          ? "Please select an option above"
+                          : placeholder
+                      }
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyPress}
-                      disabled={isTyping}
+                      disabled={isTyping || showOptions}
                     />
                     <button
                       className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-300"
                       onClick={() => handleSend()}
-                      disabled={!inputValue.trim() || isTyping}
+                      disabled={!inputValue.trim() || isTyping || showOptions}
                     >
                       <ArrowUp className="w-5 h-5" />
                     </button>

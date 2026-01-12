@@ -55,18 +55,19 @@ The widget uses a structured conversation API (V2):
 
 ## User Flow (V2)
 
-1. **Conversation Initialization**:
-   - When opened for the first time, calls `/conversation/start`.
-   - The `conversation_id` is stored in `localStorage` for continuity.
-2. **Proactive Interaction**:
-   - The bot's response dictates the UI behavior.
-   - If `response_type` is `options` or `boolean`, the `OptionsList` component renders selectable buttons.
-   - If `response_type` is `contact_form` or `collect_details` is true, the `ContactForm` renders dynamically based on requested `data_fields`.
-3. **Structured Data Submission**:
-   - Forms are submitted to `/conversation/submit-details`.
-   - After submission, the widget automatically sends a follow-up or waits for the next step.
-4. **Messaging**:
-   - User messages are sent to `/conversation/send` with the current `conversation_id`.
+61. **Welcome Message**: A hardcoded welcome message is displayed at the top of the chat. This message is static and not saved in the message history.
+62. **Conversation Initialization**:
+    - When opened for the first time, calls `/conversation/start`.
+    - The `conversation_id` is stored in `localStorage` for continuity.
+63. **Proactive Interaction**:
+    - The bot's response dictates the UI behavior.
+    - If `response_type` is `options` or `boolean`, the `OptionsList` component renders selectable buttons.
+    - **Note**: The user text input is disabled when options are active to ensure a structured conversation flow.
+64. **Structured Data Submission**:
+    - If `response_type` is `contact_form` or `collect_details` is true, the `ContactForm` renders dynamically based on requested `data_fields`.
+    - Forms are submitted to `/conversation/submit-details`.
+65. **Messaging**:
+    - User messages are sent to `/conversation/send` with the current `conversation_id`.
 
 ## Data Persistence & State Management
 
@@ -75,8 +76,9 @@ The widget persists data to maintain state across page reloads:
 1. **Conversation ID**: Saved to `localStorage` under `twocode_chat_id`.
 2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
 3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
-4. **Closed State**: The widget pill displays dynamic content:
-   - If no chat history: Shows the configured `formSubtitle`.
+4. **Session Timeout**: The widget implements a **3-hour inactivity timeout**. If a user returns after 3 hours since their last activity (sending/receiving a message), the chat history and conversation ID are cleared, and a new session starts automatically.
+5. **Closed State**: The widget pill displays dynamic content:
+   - If no chat history: Shows the configured `subtitle`.
    - If chat exists: Shows the last message sent or received.
 
 ## Bundling (UMD)
