@@ -77,9 +77,10 @@ The widget persists data to maintain state across page reloads:
 2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
 3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
 4. **Session Timeout**: The widget implements a **3-hour inactivity timeout**. If a user returns after 3 hours since their last activity (sending/receiving a message), the chat history and conversation ID are cleared, and a new session starts automatically.
-5. **Closed State**: The widget pill displays dynamic content:
-   - If no chat history: Shows the configured `subtitle`.
-   - If chat exists: Shows the last message sent or received.
+5. **Closed State**: The widget features a premium shield-style icon in the top-right corner.
+   - **Visuals**: Includes a blue glow effect and a 2-second pulse animation for liveliness.
+   - **UX Label**: A "Need help?" label is displayed below the shield.
+   - **Online Status**: A pulsing green dot indicates active support availability.
 
 ## Bundling (UMD)
 

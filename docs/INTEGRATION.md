@@ -37,12 +37,12 @@ Initialize the widget with your desired configuration:
 
 You can customize the widget by passing an options object to the `init` method.
 
-| Option         | Type     | Default                               | Description                                                                  |
-| :------------- | :------- | :------------------------------------ | :--------------------------------------------------------------------------- |
-| `title`        | `string` | `"Chat Support"`                      | The main title displayed in the widget header.                               |
-| `subtitle`     | `string` | `"We typically reply within minutes"` | Subtitle text below the main title.                                          |
-| `placeholder`  | `string` | `"Type your message..."`              | Placeholder text for the message input.                                      |
-| `formSubtitle` | `string` | `"Please enter your details..."`      | Subtitle for the form. Also shown in closed state if no chat history exists. |
+| Option         | Type     | Default                               | Description                                           |
+| :------------- | :------- | :------------------------------------ | :---------------------------------------------------- |
+| `title`        | `string` | `"Chat Support"`                      | Main title (currently hidden in UI for minimal look). |
+| `subtitle`     | `string` | `"We typically reply within minutes"` | Subtitle (currently hidden in UI for minimal look).   |
+| `placeholder`  | `string` | `"Type your message..."`              | Placeholder text for the message input.               |
+| `formSubtitle` | `string` | `"Please enter your details..."`      | Subtitle for the pre-chat form.                       |
 
 ## Hosting the Widget
 

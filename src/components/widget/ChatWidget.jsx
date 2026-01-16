@@ -21,7 +21,7 @@ const SESSION_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 const API_BASE = "https://tracking-software.aicumen.cloud";
 
-const WELCOME_MESSAGE = "Hello! 👋 How can I help you today?";
+const WELCOME_MESSAGE = "Welcome to Plus Restoration.";
 
 const ChatWidgetContent = ({
   title = "Chat Support",
@@ -275,65 +275,52 @@ const ChatWidgetContent = ({
 
   return (
     <div
-      className={`font-sans antialiased fixed z-[999999] flex flex-col items-end transition-[bottom,right] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-        isOpen ? "bottom-0 right-0 sm:bottom-6 sm:right-6" : "bottom-6 right-6"
+      className={`font-sans antialiased fixed z-[999999] flex flex-col items-end transition-[top,right] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        isOpen ? "top-0 right-0 sm:top-12 sm:right-6" : "top-12 right-6"
       }`}
     >
       <div
         className={`
           relative flex flex-col overflow-hidden
-          transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-bottom-right
+          transition-all duration-700 ease-[cubic-bezier(0.34,1.7,0.64,1)] origin-top-right
           ${
             isOpen
-              ? "w-screen h-[100dvh] sm:w-[360px] sm:h-[520px] rounded-none sm:rounded-3xl bg-white shadow-none sm:shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-none sm:border sm:border-slate-100"
-              : "w-[300px] h-[58px] rounded-full bg-white shadow-lg shadow-slate-200/50 cursor-pointer hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-xl border border-slate-100"
+              ? "w-screen h-[100dvh] sm:w-[380px] sm:h-[600px] rounded-none sm:rounded-3xl bg-white shadow-2xl sm:shadow-[0_20px_60px_rgba(0,0,0,0.15)] border-none sm:border sm:border-slate-100/50"
+              : "w-[96px] h-[108px] cursor-pointer transition-all duration-500 group/widget"
           }
         `}
       >
         {/* Closed State */}
         <div
           className={`
-            absolute inset-0 flex items-center px-2 gap-4 transition-all duration-300 z-10
+            flex flex-col items-center justify-center gap-2 transition-all duration-500 z-10
             ${
               isOpen
-                ? "opacity-0 scale-90 pointer-events-none"
-                : "opacity-100 scale-100 delay-100"
+                ? "opacity-0 scale-50 pointer-events-none absolute inset-0"
+                : "opacity-100 scale-100 delay-200 absolute inset-0"
             }
           `}
           onClick={() => !isOpen && setIsOpen(true)}
         >
-          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center relative shrink-0">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center border border-slate-100 overflow-hidden transition-all duration-500 group-hover/widget:rotate-6 animate-shield-pulse shield-glow">
+              <img
+                src="/shield-icon.png"
+                alt="Support Shield"
+                className="w-12 h-12 object-contain"
+              />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm animate-pulse" />
           </div>
-          <div className="flex-1 min-w-0 text-left">
-            <h3 className="text-sm font-semibold text-slate-900 leading-tight">
-              {title}
-            </h3>
-            <p className="text-xs text-slate-500 truncate">
-              {messages.length > 0
-                ? messages[messages.length - 1].text
-                : subtitle}
-              {/* // : WELCOME_MESSAGE */}
-            </p>
-          </div>
-          <ChevronsUp className="w-5 h-5 text-slate-400" />
+          <p className="text-[12px] font-bold text-slate-800 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100 whitespace-nowrap transition-transform duration-500 group-hover/widget:-translate-y-0.5">
+            Need help?
+          </p>
         </div>
 
         {/* Open State (Chat Window) */}
         {isOpen && (
           <div className="flex flex-col w-full h-full bg-white">
-            <div className="p-5 bg-white flex items-center gap-4 shrink-0 border-b border-slate-50">
-              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center relative shrink-0">
-                <MessageSquare className="w-5 h-5 text-blue-600" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-slate-900 leading-tight truncate">
-                  {title}
-                </h3>
-                <p className="text-xs text-slate-500 truncate">{subtitle}</p>
-              </div>
+            <div className="p-4 bg-white flex items-center justify-end shrink-0 border-b border-slate-50">
               <button
                 className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors duration-200 focus:outline-none"
                 onClick={(e) => {
