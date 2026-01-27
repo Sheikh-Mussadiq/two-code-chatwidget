@@ -39,7 +39,7 @@ The entry point for the standalone widget library. It handles:
 - Checking if the widget container exists.
 - Creating the container in the DOM.
 - Mounting the React application (`ChatWidget`) into the container.
-- Exposing the `TwoCodeChatWidget` global object for initialization.
+- Exposing the `PlusRestorationChatWidget` global object for initialization.
 
 ### `src/components/widget/ChatWidget.jsx`
 
@@ -83,16 +83,16 @@ The widget uses a structured conversation API (V2):
 
 The widget persists data to maintain state across page reloads:
 
-1. **Conversation ID**: Saved to `localStorage` under `twocode_chat_id`.
-2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
-3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
+1. **Conversation ID**: Saved to `localStorage` under `plus_restoration_chat_id`.
+2. **User Details**: Saved to `localStorage` under `plus_restoration_chat_user_info`.
+3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `plus_restoration_chat_messages`.
 
 ### `vite.config.js`
 
 Configuration for Vite. It handles two build modes:
 
 1.  **Serve/Dev**: Standard React app build for local development.
-2.  **Library Build**: Bundles `src/widget.jsx` into a single UMD file (`dist-widget/two-code-chat-widget.umd.js`) for external use.
+2.  **Library Build**: Bundles `src/widget.jsx` into a single UMD file (`dist-widget/plus-restoration-chat-widget.umd.js`) for external use.
 
 ### `tailwind.config.js`
 

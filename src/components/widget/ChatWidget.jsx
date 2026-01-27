@@ -10,10 +10,10 @@ import OptionsList from "./OptionsList";
 import styles from "../../index.css?inline";
 
 const STORAGE_KEYS = {
-  USER_INFO: "twocode_chat_user_info",
-  MESSAGES: "twocode_chat_messages",
-  CONVERSATION_ID: "twocode_chat_id",
-  LAST_ACTIVITY: "twocode_chat_last_activity",
+  USER_INFO: "plus_restoration_chat_user_info",
+  MESSAGES: "plus_restoration_chat_messages",
+  CONVERSATION_ID: "plus_restoration_chat_id",
+  LAST_ACTIVITY: "plus_restoration_chat_last_activity",
 };
 
 const SESSION_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours
@@ -116,7 +116,7 @@ const ChatWidgetContent = ({
     try {
       const url = new URL(`${API_BASE}${path}`);
       Object.keys(queryParams).forEach((key) =>
-        url.searchParams.append(key, queryParams[key])
+        url.searchParams.append(key, queryParams[key]),
       );
 
       const response = await fetch(url, {

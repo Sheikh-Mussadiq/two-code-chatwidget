@@ -1,6 +1,6 @@
 # Integration Guide
 
-This guide provides instructions on how to integrate the TwoCode Chat Widget into your website.
+This guide provides instructions on how to integrate the Plus Restoration Chat Widget into your website.
 
 ## Quick Start
 
@@ -11,10 +11,10 @@ The easiest way to add the widget is by including the UMD bundle directly in you
 Add the following script tag before the closing `</body>` tag of your website:
 
 ```html
-<script src="https://your-domain.com/two-code-chat-widget.umd.js"></script>
+<script src="https://your-domain.com/plus-restoration-chat-widget.umd.js"></script>
 ```
 
-> **Note:** Replace `https://your-domain.com` with the actual URL where you are hosting the `two-code-chat-widget.umd.js` file.
+> **Note:** Replace `https://your-domain.com` with the actual URL where you are hosting the `plus-restoration-chat-widget.umd.js` file.
 
 ### 2. Initialize the Widget
 
@@ -22,7 +22,7 @@ Initialize the widget with your desired configuration:
 
 ```html
 <script>
-  TwoCodeChatWidget.init({
+  PlusRestorationChatWidget.init({
     title: "Chat Support",
     subtitle: "We typically reply within minutes",
     welcomeMessage: "Hello! 👋 How can I help you today?",
@@ -49,6 +49,6 @@ You can customize the widget by passing an options object to the `init` method.
 To host the widget yourself:
 
 1. Build the project using `npm run build:widget`.
-2. Locate the `dist-widget/two-code-chat-widget.umd.js` file.
+2. Locate the `dist-widget/plus-restoration-chat-widget.umd.js` file.
 3. Upload this file to your web server, CDN, or static file host (e.g., S3, Netlify, Vercel).
 4. Use the public URL of the uploaded file in the `<script src="...">` tag.

@@ -1,6 +1,6 @@
 # How It Works
 
-This document explains the technical implementation details of the TwoCode Chat Widget.
+This document explains the technical implementation details of the Plus Restoration Chat Widget.
 
 ## Architecture
 
@@ -73,9 +73,9 @@ The widget uses a structured conversation API (V2):
 
 The widget persists data to maintain state across page reloads:
 
-1. **Conversation ID**: Saved to `localStorage` under `twocode_chat_id`.
-2. **User Details**: Saved to `localStorage` under `twocode_chat_user_info`.
-3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `twocode_chat_messages`.
+1. **Conversation ID**: Saved to `localStorage` under `plus_restoration_chat_id`.
+2. **User Details**: Saved to `localStorage` under `plus_restoration_chat_user_info`.
+3. **Chat History**: All messages (including metadata like `response_type`) are saved to `localStorage` under `plus_restoration_chat_messages`.
 4. **Session Timeout**: The widget implements a **3-hour inactivity timeout**. If a user returns after 3 hours since their last activity (sending/receiving a message), the chat history and conversation ID are cleared, and a new session starts automatically.
 5. **Closed State**: The widget features a premium shield-style icon in the top-right corner.
    - **Visuals**: Includes a blue glow effect and a 2-second pulse animation for liveliness.
@@ -87,12 +87,12 @@ The widget persists data to maintain state across page reloads:
 The widget is bundled as a **Universal Module Definition (UMD)** library.
 
 - **Entry Point**: `src/widget.jsx`
-- **Output**: `dist-widget/two-code-chat-widget.umd.js`
+- **Output**: `dist-widget/plus-restoration-chat-widget.umd.js`
 
 When you run `npm run build:widget`:
 
 1. Vite compiles the React code and Tailwind CSS.
 2. It creates a single JavaScript file that contains everything (logic + styles).
-3. It exposes a global object `TwoCodeChatWidget` on the `window` object.
+3. It exposes a global object `PlusRestorationChatWidget` on the `window` object.
 
 This allows users to simply include one `<script>` tag and start using the widget immediately.

@@ -164,11 +164,11 @@ const Index = () => {
             <div className="bg-slate-800 rounded-xl p-6 overflow-x-auto">
               <pre className="text-sm text-slate-300 font-mono">
                 {`<!-- 1. Add the widget script -->
-<script src="https://your-domain.com/two-code-chat-widget.umd.js"></script>
+<script src="https://your-domain.com/plus-restoration-chat-widget.umd.js"></script>
 
 <!-- 2. Initialize the widget -->
 <script>
-  TwoCodeChatWidget.init({
+  PlusRestorationChatWidget.init({
     title: "Chat Support",
     subtitle: "We typically reply within minutes",
     welcomeMessage: "Hello! 👋 How can I help you today?",
@@ -296,8 +296,8 @@ const Index = () => {
 
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8">
           <p className="text-blue-800 mb-2">
-            This is a demo page showing the TwoCode Chat Widget in action. The
-            widget is loaded at the bottom right of the page.
+            This is a demo page showing the Plus Restoration Chat Widget in
+            action. The widget is loaded at the bottom right of the page.
           </p>
           <p className="text-blue-700 font-medium">
             You can interact with the widget by clicking on the chat icon.
@@ -310,8 +310,8 @@ const Index = () => {
               About This Demo
             </h2>
             <p className="text-slate-600 leading-relaxed">
-              This page demonstrates how to integrate the TwoCode Chat Widget
-              into a webpage. The widget is loaded as a UMD module and
+              This page demonstrates how to integrate the Plus Restoration Chat
+              Widget into a webpage. The widget is loaded as a UMD module and
               initialized with default settings.
             </p>
           </div>
@@ -326,7 +326,7 @@ const Index = () => {
             <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 overflow-x-auto">
               <pre className="text-sm text-slate-800 font-mono">
                 <code className="block whitespace-pre overflow-x-auto">
-                  {`TwoCodeChatWidget.init({
+                  {`PlusRestorationChatWidget.init({
   title: "Chat Support",
   subtitle: "We're here to help!",
   welcomeMessage: "Hello! 👋 How can I help you today?",

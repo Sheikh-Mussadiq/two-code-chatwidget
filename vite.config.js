@@ -37,8 +37,8 @@ export default defineConfig(({ command, mode }) => {
       build: {
         lib: {
           entry: path.resolve(__dirname, "src/widget.jsx"),
-          name: "TwoCodeChatWidget",
-          fileName: (format) => `two-code-chat-widget.${format}.js`,
+          name: "PlusRestorationChatWidget",
+          fileName: (format) => `plus-restoration-chat-widget.${format}.js`,
           formats: ["umd"],
         },
         rollupOptions: {
