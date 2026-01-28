@@ -358,11 +358,11 @@ const ChatWidgetContent = ({
               <div className="flex-1 px-5 py-6 overflow-y-auto space-y-4 scroll-smooth custom-scrollbar flex flex-col overscroll-contain scroll-fade-mask">
                 {/* Welcome Message (Not in history) */}
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                  <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-md mt-1 overflow-hidden">
                     <img
                       src="/shield-icon.png"
                       alt="Bot"
-                      className="w-5 h-5 object-contain"
+                      className="w-8 h-8 object-contain"
                     />
                   </div>
                   <div className="flex flex-col gap-1 max-w-[80%]">
@@ -385,11 +385,11 @@ const ChatWidgetContent = ({
                     className={`flex gap-3 ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
                   >
                     {message.sender === "bot" && (
-                      <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                      <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-md mt-1 overflow-hidden">
                         <img
                           src="/shield-icon.png"
                           alt="Bot"
-                          className="w-5 h-5 object-contain"
+                          className="w-8 h-8 object-contain"
                         />
                       </div>
                     )}
@@ -438,11 +438,11 @@ const ChatWidgetContent = ({
                 ))}
                 {isTyping && (
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-md mt-1 overflow-hidden">
                       <img
                         src="/shield-icon.png"
                         alt="Bot"
-                        className="w-5 h-5 object-contain"
+                        className="w-8 h-8 object-contain"
                       />
                     </div>
                     <div className="flex gap-1.5 p-4 bg-slate-50 w-fit rounded-2xl rounded-tl-sm self-start border border-slate-100">
