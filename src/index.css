@@ -127,21 +127,21 @@ All colors MUST be HSL.
   background-color: rgba(148, 163, 184, 0.5);
 }
 
-/* Scroll Fade Mask */
+/* Scroll Fade Mask for Modern Mesh Blurry Feel */
 .scroll-fade-mask {
   -webkit-mask-image: linear-gradient(
     to bottom,
-    transparent,
-    black 1.5rem,
-    black calc(100% - 1.5rem),
-    transparent
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
-    transparent,
-    black 1.5rem,
-    black calc(100% - 1.5rem),
-    transparent
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
   );
 }
 

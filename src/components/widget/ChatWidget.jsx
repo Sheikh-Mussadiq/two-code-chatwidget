@@ -249,6 +249,12 @@ const ChatWidgetContent = ({
     handleSend(option);
   };
 
+  const formatTime = (date) => {
+    if (!date) return "";
+    const d = typeof date === "string" ? new Date(date) : date;
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -320,7 +326,19 @@ const ChatWidgetContent = ({
         {/* Open State (Chat Window) */}
         {isOpen && (
           <div className="flex flex-col w-full h-full bg-white">
-            <div className="p-4 bg-white flex items-center justify-end shrink-0 border-b border-slate-50">
+            <div className="p-4 bg-white flex items-center justify-between shrink-0 border-b border-slate-50">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center">
+                  <img
+                    src="/shield-icon.png"
+                    alt="Plus Restoration"
+                    className="w-10 h-10 object-contain"
+                  />
+                </div>
+                <span className="text-lg font-bold text-slate-800">
+                  Plus Restoration
+                </span>
+              </div>
               <button
                 className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors duration-200 focus:outline-none"
                 onClick={(e) => {
@@ -332,63 +350,106 @@ const ChatWidgetContent = ({
               </button>
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 px-5 py-6 overflow-y-auto space-y-4 scroll-smooth custom-scrollbar flex flex-col overscroll-contain">
+            <div className="flex-1 flex flex-col min-h-0 relative">
+              {/* Mesh Blur Overlays */}
+              {/* <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent backdrop-blur-[2px] z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent backdrop-blur-[2px] z-10 pointer-events-none" /> */}
+
+              <div className="flex-1 px-5 py-6 overflow-y-auto space-y-4 scroll-smooth custom-scrollbar flex flex-col overscroll-contain scroll-fade-mask">
                 {/* Welcome Message (Not in history) */}
-                <div className="flex flex-col gap-1">
-                  <div className="max-w-[85%] p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm self-start bg-slate-100 text-slate-800 rounded-tl-sm animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div className="prose prose-sm prose-slate max-w-none">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkBreaks]}
-                        rehypePlugins={[rehypeRaw]}
-                      >
-                        {WELCOME_MESSAGE}
-                      </ReactMarkdown>
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                    <img
+                      src="/shield-icon.png"
+                      alt="Bot"
+                      className="w-5 h-5 object-contain"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 max-w-[80%]">
+                    <div className="p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm bg-slate-100 text-slate-800 rounded-tl-sm animate-in slide-in-from-bottom-2 fade-in duration-300">
+                      <div className="prose prose-sm prose-slate max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                          rehypePlugins={[rehypeRaw]}
+                        >
+                          {WELCOME_MESSAGE}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {messages.map((message) => (
-                  <div key={message.id} className="flex flex-col gap-1">
-                    <div
-                      className={`
-                      max-w-[85%] p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm animate-in slide-in-from-bottom-2 fade-in duration-300
-                      ${
-                        message.sender === "user"
-                          ? "self-end bg-blue-600 text-white rounded-tr-sm"
-                          : "self-start bg-slate-100 text-slate-800 rounded-tl-sm"
-                      }
-                    `}
-                    >
-                      {message.sender === "bot" ? (
-                        <div className="prose prose-sm prose-slate max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm, remarkBreaks]}
-                            rehypePlugins={[rehypeRaw]}
-                          >
-                            {message.text}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        message.text
-                      )}
-                    </div>
-                    {message.sender === "bot" &&
-                      messages.indexOf(message) === messages.length - 1 &&
-                      showOptions && (
-                        <OptionsList
-                          options={options}
-                          onSelect={handleOptionSelect}
-                          disabled={isTyping}
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
+                  >
+                    {message.sender === "bot" && (
+                      <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                        <img
+                          src="/shield-icon.png"
+                          alt="Bot"
+                          className="w-5 h-5 object-contain"
                         />
-                      )}
+                      </div>
+                    )}
+                    <div
+                      className={`flex flex-col gap-1 ${message.sender === "user" ? "items-end" : "items-start"} max-w-[80%]`}
+                    >
+                      <div
+                        className={`
+                        p-3.5 px-5 rounded-2xl text-sm leading-relaxed shadow-sm animate-in slide-in-from-bottom-2 fade-in duration-300
+                        ${
+                          message.sender === "user"
+                            ? "bg-blue-600 text-white rounded-tr-sm"
+                            : "bg-slate-100 text-slate-800 rounded-tl-sm"
+                        }
+                      `}
+                      >
+                        {message.sender === "bot" ? (
+                          <div className="prose prose-sm prose-slate max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm, remarkBreaks]}
+                              rehypePlugins={[rehypeRaw]}
+                            >
+                              {message.text}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
+                          message.text
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-400 px-1">
+                        {formatTime(message.timestamp)}
+                      </span>
+                      {message.sender === "bot" &&
+                        messages.indexOf(message) === messages.length - 1 &&
+                        showOptions && (
+                          <div className="mt-2 w-full">
+                            <OptionsList
+                              options={options}
+                              onSelect={handleOptionSelect}
+                              disabled={isTyping}
+                            />
+                          </div>
+                        )}
+                    </div>
                   </div>
                 ))}
                 {isTyping && (
-                  <div className="flex gap-1.5 p-4 bg-slate-50 w-fit rounded-2xl rounded-tl-sm self-start border border-slate-100">
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+                      <img
+                        src="/shield-icon.png"
+                        alt="Bot"
+                        className="w-5 h-5 object-contain"
+                      />
+                    </div>
+                    <div className="flex gap-1.5 p-4 bg-slate-50 w-fit rounded-2xl rounded-tl-sm self-start border border-slate-100">
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                    </div>
                   </div>
                 )}
                 <div ref={messagesEndRef} />

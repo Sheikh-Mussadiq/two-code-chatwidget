@@ -4,7 +4,7 @@ const OptionsList = ({ options, onSelect, disabled }) => {
   if (!options || options.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
       {options.map((option, index) => (
         <button
           key={index}
