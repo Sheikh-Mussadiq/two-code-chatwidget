@@ -71,6 +71,7 @@ const ChatWidgetContent = ({
   const [currentResponse, setCurrentResponse] = useState(null);
 
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,6 +103,10 @@ const ChatWidgetContent = ({
   useEffect(() => {
     if (isOpen) {
       scrollToBottom();
+      // Auto-focus input when widget opens
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500); // Wait for open animation
     }
   }, [isOpen, isTyping, scrollToBottom]);
 
@@ -216,6 +221,10 @@ const ChatWidgetContent = ({
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
+      // Refocus input after sending
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -470,6 +479,7 @@ const ChatWidgetContent = ({
                     className={`flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-1.5 py-1.5 transition-all duration-200 ${!showOptions ? "focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100" : "opacity-75 cursor-not-allowed"}`}
                   >
                     <input
+                      ref={inputRef}
                       type="text"
                       className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 pl-3 disabled:cursor-not-allowed"
                       placeholder={
